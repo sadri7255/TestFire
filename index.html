@@ -76,18 +76,25 @@
                 return;
             }
 
-            // Test 3: Database Write
+            // Test 3: Database Write with Timeout
             log("۳. در حال نوشتن یک داده آزمایشی در Realtime Database...");
             let db;
             try {
                 db = getDatabase(app);
                 const testRef = ref(db, `test-write/${user.uid}`);
-                await set(testRef, { timestamp: new Date().toISOString() });
+                
+                // Add a timeout to the write operation
+                const writePromise = set(testRef, { timestamp: new Date().toISOString() });
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error("Timeout: Operation took too long.")), 10000) // 10-second timeout
+                );
+
+                await Promise.race([writePromise, timeoutPromise]);
                 log("   <span class='success'>موفقیت:</span> داده آزمایشی با موفقیت در پایگاه داده نوشته شد.", "success");
             } catch(e) {
                 log("   <span class='error'>خطا:</span> نوشتن در پایگاه داده ناموفق بود.", "error");
-                log(`<pre><b>Code:</b> ${e.code}<br><b>Message:</b> ${e.message}</pre>`, "error");
-                log("   <b>راه حل احتمالی:</b> مطمئن شوید که Realtime Database را در پروژه Firebase خود ایجاد کرده‌اید و قوانین امنیتی (Rules) آن روی حالت تست (read/write: true) تنظیم شده است.", "info");
+                log(`<pre><b>Code:</b> ${e.code || 'TIMEOUT'}<br><b>Message:</b> ${e.message}</pre>`, "error");
+                log("   <b>راه حل احتمالی:</b> مطمئن شوید که Realtime Database را در پروژه Firebase خود ایجاد کرده‌اید و قوانین امنیتی (Rules) آن روی حالت تست (`.read: true, .write: true`) تنظیم شده است. این قوانین پس از ۳۰ روز منقضی می‌شوند و باید مجدداً تنظیم شوند.", "info");
                 return;
             }
             
