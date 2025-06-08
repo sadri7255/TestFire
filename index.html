@@ -36,11 +36,13 @@
             logContainer.appendChild(item);
         };
         
+        // --- Firebase Configuration ---
+        // آدرس پایگاه داده با مقدار صحیح جایگزین شد
         const firebaseConfig = {
             apiKey: "AIzaSyC415a4wKJ_RISihbKeNEFDRwpy7V_7pj0",
             authDomain: "pythontest-4deab.firebaseapp.com",
             projectId: "pythontest-4deab",
-            databaseURL: "https://pythontest-4deab-default-rtdb.firebaseio.com",
+            databaseURL: "https://pythontest-4deab-default-rtdb.asia-southeast1.firebasedatabase.app",
             storageBucket: "pythontest-4deab.appspot.com",
             messagingSenderId: "267415735118",
             appId: "1:267415735118:web:dada57d8c349ed40bb2c1f",
@@ -72,7 +74,7 @@
             } catch (e) {
                 log("   <span class='error'>خطا:</span> ورود ناشناس ناموفق بود.", "error");
                 log(`<pre><b>Code:</b> ${e.code}<br><b>Message:</b> ${e.message}</pre>`, "error");
-                log("   <b>راه حل احتمالی:</b> مطمئن شوید که 'Anonymous' در بخش Authentication > Sign-in method پروژه Firebase شما فعال است و دامنه شما (sadri7255.github.io) در لیست Authorized domains قرار دارد.", "info");
+                log("   <b>راه حل احتمالی:</b> مطمئن شوید که 'Anonymous' در بخش Authentication > Sign-in method پروژه Firebase شما فعال است.", "info");
                 return;
             }
 
@@ -83,7 +85,6 @@
                 db = getDatabase(app);
                 const testRef = ref(db, `test-write/${user.uid}`);
                 
-                // Add a timeout to the write operation
                 const writePromise = set(testRef, { timestamp: new Date().toISOString() });
                 const timeoutPromise = new Promise((_, reject) => 
                     setTimeout(() => reject(new Error("Timeout: Operation took too long.")), 10000) // 10-second timeout
@@ -94,7 +95,7 @@
             } catch(e) {
                 log("   <span class='error'>خطا:</span> نوشتن در پایگاه داده ناموفق بود.", "error");
                 log(`<pre><b>Code:</b> ${e.code || 'TIMEOUT'}<br><b>Message:</b> ${e.message}</pre>`, "error");
-                log("   <b>راه حل احتمالی:</b> مطمئن شوید که Realtime Database را در پروژه Firebase خود ایجاد کرده‌اید و قوانین امنیتی (Rules) آن روی حالت تست (`.read: true, .write: true`) تنظیم شده است. این قوانین پس از ۳۰ روز منقضی می‌شوند و باید مجدداً تنظیم شوند.", "info");
+                log("   <b>راه حل احتمالی:</b> لطفاً مطمئن شوید مقدار `databaseURL` در کد با آدرسی که در کنسول Firebase می‌بینید (مثلاً با پسوند `asia-southeast1`) یکی است. همچنین از فعال بودن قوانین امنیتی تست (`.read: true, .write: true`) اطمینان حاصل کنید.", "info");
                 return;
             }
             
