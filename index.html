@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ابزار عیب‌یابی Firebase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Vazirmatn', sans-serif; }
+        .log-item { padding: 8px; border-bottom: 1px solid #eee; }
+        .log-item.success { color: #16a34a; }
+        .log-item.error { color: #dc2626; font-weight: bold; }
+        .log-item.info { color: #6b7280; }
+        .log-item pre { white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold text-center mb-4">گزارش عیب‌یابی اتصال به Firebase</h1>
+        <div id="log" class="bg-gray-50 rounded p-4 text-sm font-mono">
+            <!-- Log messages will appear here -->
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        const logContainer = document.getElementById('log');
+        const log = (message, type = 'info') => {
+            const item = document.createElement('div');
+            item.className = `log-item ${type}`;
+            item.innerHTML = message;
+            logContainer.appendChild(item);
+        };
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyC415a4wKJ_RISihbKeNEFDRwpy7V_7pj0",
+            authDomain: "pythontest-4deab.firebaseapp.com",
+            projectId: "pythontest-4deab",
+            databaseURL: "https://pythontest-4deab-default-rtdb.firebaseio.com",
+            storageBucket: "pythontest-4deab.appspot.com",
+            messagingSenderId: "267415735118",
+            appId: "1:267415735118:web:dada57d8c349ed40bb2c1f",
+            measurementId: "G-ZK8N93Y3K2"
+        };
+
+        async function runTests() {
+            // Test 1: Initialization
+            log("۱. در حال مقداردهی اولیه Firebase...");
+            let app;
+            try {
+                app = initializeApp(firebaseConfig);
+                log("   <span class='success'>موفقیت:</span> برنامه Firebase با موفقیت مقداردهی اولیه شد.", "success");
+            } catch (e) {
+                log("   <span class='error'>خطا:</span> مقداردهی اولیه Firebase ناموفق بود.", "error");
+                log(`<pre>${e.message}</pre>`, "error");
+                return;
+            }
+
+            // Test 2: Authentication
+            log("۲. در حال ورود به صورت ناشناس...");
+            let auth;
+            let user;
+            try {
+                auth = getAuth(app);
+                const userCredential = await signInAnonymously(auth);
+                user = userCredential.user;
+                log("   <span class='success'>موفقیت:</span> ورود ناشناس انجام شد. شناسه کاربر دریافت شد.", "success");
+            } catch (e) {
+                log("   <span class='error'>خطا:</span> ورود ناشناس ناموفق بود.", "error");
+                log(`<pre><b>Code:</b> ${e.code}<br><b>Message:</b> ${e.message}</pre>`, "error");
+                log("   <b>راه حل احتمالی:</b> مطمئن شوید که 'Anonymous' در بخش Authentication > Sign-in method پروژه Firebase شما فعال است و دامنه شما (sadri7255.github.io) در لیست Authorized domains قرار دارد.", "info");
+                return;
+            }
+
+            // Test 3: Database Write
+            log("۳. در حال نوشتن یک داده آزمایشی در Realtime Database...");
+            let db;
+            try {
+                db = getDatabase(app);
+                const testRef = ref(db, `test-write/${user.uid}`);
+                await set(testRef, { timestamp: new Date().toISOString() });
+                log("   <span class='success'>موفقیت:</span> داده آزمایشی با موفقیت در پایگاه داده نوشته شد.", "success");
+            } catch(e) {
+                log("   <span class='error'>خطا:</span> نوشتن در پایگاه داده ناموفق بود.", "error");
+                log(`<pre><b>Code:</b> ${e.code}<br><b>Message:</b> ${e.message}</pre>`, "error");
+                log("   <b>راه حل احتمالی:</b> مطمئن شوید که Realtime Database را در پروژه Firebase خود ایجاد کرده‌اید و قوانین امنیتی (Rules) آن روی حالت تست (read/write: true) تنظیم شده است.", "info");
+                return;
+            }
+            
+            log("<hr class='my-4'> <b class='success'>نتیجه نهایی: تمام مراحل با موفقیت انجام شد. اتصال به Firebase برقرار است.</b>", "success");
+        }
+
+        runTests();
+    </script>
+</body>
+</html>
